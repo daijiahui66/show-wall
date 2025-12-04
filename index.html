@@ -54,13 +54,7 @@
       .dot.active{background:#ffeff5;border-color:#ffb8cf}
       .hint{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:#fff0f5;border:1px solid var(--border);color:#a51743;font-size:13px}
       .hidden{display:none}
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
       .action{display:inline-block;padding:8px 12px;border-radius:14px;background:#fff;border:1px solid var(--border);color:#8c0f37}
->>>>>>> 3338a79 (2025/12/04 10:44:33: Data update)
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
       .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:40}
       .overlay.show{display:grid;place-items:center}
       .modal{width:min(860px,94vw);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.18)}
@@ -113,21 +107,6 @@
 
     <main class="container" style="padding:20px 0 24px">
       <section class="filters">
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
-        <div style="display:flex;align-items:center;gap:10px">
-          <input id="search" type="search" placeholder="搜索标题或留言关键词…" class="input" />
-          <label class="checkbox"><input id="onlyWithImages" type="checkbox" /> 仅显示有图</label>
-        </div>
-        <div class="subtitle">数据源：datacvs.csv · 状态=可展示</div>
-      </section>
-
-      <section id="wall" class="masonry"></section>
-<<<<<<< HEAD
-=======
-=======
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <input id="search" type="search" placeholder="搜索标题或留言关键词…" class="input" />
           <label class="checkbox"><input id="onlyWithImages" type="checkbox" /> 仅显示有图</label>
@@ -138,8 +117,6 @@
 
       <section id="wall" class="masonry"></section>
       <div id="sentinel" style="height:1px"></div>
->>>>>>> 3338a79 (2025/12/04 10:44:33: Data update)
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
       <section id="error" class="card-body hidden">
         <div class="hint" style="margin-top:8px">
           <span>⚠️</span>
@@ -259,12 +236,6 @@
         const withImagesEl=document.getElementById('onlyWithImages');
         const errorEl=document.getElementById('error');
         const picker=document.getElementById('filePicker');
-<<<<<<< HEAD
-        let allRows=[];
-=======
-<<<<<<< HEAD
-        let allRows=[];
-=======
         const reloadBtn=document.getElementById('reloadBtn');
         const subtitleEl=document.getElementById('subtitle');
         let allRows=[];
@@ -275,8 +246,6 @@
         let visibleCount=50;
         let lastRenderedIndex=0;
         let io;
->>>>>>> 3338a79 (2025/12/04 10:44:33: Data update)
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
 
         function parseImageCount(cell){
           if(!cell) return 0; const s=String(cell).trim(); if(!s) return 0; return s.split(',').map(x=>x.trim()).filter(Boolean).length;
@@ -336,47 +305,7 @@
           dots.forEach(d=>d.addEventListener('click',()=>show(Number(d.dataset.idx||'0'))));
           show(0);
         }
-        function render(rows){
-          clearWall();
-          rows.forEach(row=>{
-            const { id, 标题, 日期, 留言, 图片, 状态, 是否有图 } = row;
-            const node=tpl.content.cloneNode(true);
-            const root=node.querySelector('article');
-            root.querySelector('.card-title').textContent=String(标题||'').trim()||`无标题 · ${id}`;
-            root.querySelector('.card-date').textContent=String(日期||'');
-            root.querySelector('.msg').textContent=String(留言||'').trim();
-            const hasImg=String(是否有图||'').trim()==='1';
-            const count=hasImg?parseImageCount(图片):0;
-            const paths=computeImagePaths(id,count);
-            const gallery=root.querySelector('.gallery');
-            const imagesEl=gallery.querySelector('.images');
-            const dotsEl=gallery.querySelector('.dots');
-          if(paths.length>0){
-            gallery.hidden=false;
-            paths.forEach((src,i)=>{ const wrap=document.createElement('div'); wrap.className='image-wrap'+(i===0?' active':''); wrap.dataset.idx=String(i); const img=document.createElement('img'); img.src=src; img.alt=`图片 ${id}`; img.addEventListener('error',onImgError); img.addEventListener('click', (ev)=>{ ev.stopPropagation(); const start=Number(wrap.dataset.idx|| i); openImgbox(paths, start); }); wrap.appendChild(img); imagesEl.appendChild(wrap); const dot=document.createElement('div'); dot.className='dot'+(i===0?' active':''); dot.dataset.idx=String(i); dotsEl.appendChild(dot); });
-            initViewer(gallery);
-          } else {
-            
-          }
-            root.addEventListener('click', (e)=>{
-              if(e.target.closest('.btn') || e.target.closest('.dot')) return;
-              showModal(row);
-            });
-            wallEl.appendChild(node);
-          });
-        }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
-        function applyFilters(){
-          const q=searchEl.value.trim().toLowerCase(); const onlyImg=withImagesEl.checked;
-          const filtered=allRows.filter(r=>String(r.状态).trim()==='可展示').filter(r=>{ if(!q) return true; const text=`${r.标题||''} ${r.留言||''}`.toLowerCase(); return text.includes(q); }).filter(r=>{ if(!onlyImg) return true; return String(r.是否有图||'').trim()==='1'; });
-          render(filtered);
-        }
-<<<<<<< HEAD
-=======
-=======
+        function applyFilters(){ const q=searchEl.value.trim().toLowerCase(); const onlyImg=withImagesEl.checked; filteredRows=allRows.filter(r=>String(r.状态).trim()==='可展示').filter(r=>{ if(!q) return true; const text=`${r.标题||''} ${r.留言||''}`.toLowerCase(); return text.includes(q); }).filter(r=>{ if(!onlyImg) return true; return String(r.是否有图||'').trim()==='1'; }); shuffledRows=shuffle(filteredRows.slice()); visibleCount=50; renderInit(); }
         function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=arr[i]; arr[i]=arr[j]; arr[j]=t; } return arr; }
         function buildCard(row){
           const { id, 标题, 日期, 留言, 图片, 状态, 是否有图 } = row;
@@ -405,34 +334,25 @@
         function addMore(){ if(lastRenderedIndex>=shuffledRows.length) return; renderChunk(lastRenderedIndex, lastRenderedIndex+10); updateSubtitle(); }
         function updateSubtitle(){ subtitleEl.textContent=`来源：${dataSource||'未知'} · 显示：${lastRenderedIndex}/${shuffledRows.length} · 加载：${lastLoaded||''}`; }
         function ensureObserver(){ if(io) io.disconnect(); io=new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ addMore(); if(lastRenderedIndex>=shuffledRows.length) io.disconnect(); } }); }); io.observe(document.getElementById('sentinel')); }
-        function applyFilters(){ const q=searchEl.value.trim().toLowerCase(); const onlyImg=withImagesEl.checked; filteredRows=allRows.filter(r=>String(r.状态).trim()==='可展示').filter(r=>{ if(!q) return true; const text=`${r.标题||''} ${r.留言||''}`.toLowerCase(); return text.includes(q); }).filter(r=>{ if(!onlyImg) return true; return String(r.是否有图||'').trim()==='1'; }); shuffledRows=shuffle(filteredRows.slice()); visibleCount=50; renderInit(); }
->>>>>>> 3338a79 (2025/12/04 10:44:33: Data update)
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
+        
         searchEl.addEventListener('input',applyFilters);
         withImagesEl.addEventListener('change',applyFilters);
 
         function tryEmbedded(){
           const el=document.getElementById('csv-embed');
-          if(!el) return false; const text=el.textContent||''; if(!text.trim()) return false; allRows=parseCSV(text).filter(r=>r&&r.id); applyFilters(); return true;
+          if(!el) return false; const text=el.textContent||''; if(!text.trim()) return false; allRows=parseCSV(text).filter(r=>r&&r.id); dataSource='内嵌'; lastLoaded=new Date().toLocaleString(); applyFilters(); return true;
         }
 
         function showPicker(){ errorEl.classList.remove('hidden'); picker.addEventListener('change',()=>{
           const file=picker.files&&picker.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ allRows=parseCSV(String(reader.result)).filter(r=>r&&r.id); applyFilters(); errorEl.classList.add('hidden'); }catch(e){} }; reader.readAsText(file,'utf-8');
         }); }
 
-<<<<<<< HEAD
-        fetch(csvUrl).then(r=>r.ok?r.text():Promise.reject()).then(t=>{ allRows=parseCSV(t).filter(r=>r&&r.id); applyFilters(); }).catch(()=>{ if(!tryEmbedded()) showPicker(); });
-=======
-<<<<<<< HEAD
-        fetch(csvUrl).then(r=>r.ok?r.text():Promise.reject()).then(t=>{ allRows=parseCSV(t).filter(r=>r&&r.id); applyFilters(); }).catch(()=>{ if(!tryEmbedded()) showPicker(); });
-=======
         function loadCSV(noCache, forcePicker){
           const u = noCache ? `${csvUrl}?t=${Date.now()}` : csvUrl;
           fetch(u, { cache: 'no-store' }).then(r=>r.ok?r.text():Promise.reject()).then(t=>{
             allRows=parseCSV(t).filter(r=>r&&r.id);
             dataSource='文件';
             lastLoaded=new Date().toLocaleString();
-            errorEl.classList.add('hidden');
             applyFilters();
           }).catch(()=>{
             if (forcePicker) { errorEl.classList.remove('hidden'); showPicker(); }
@@ -440,17 +360,11 @@
           });
         }
         reloadBtn.addEventListener('click',()=>loadCSV(true, true));
-        function tryEmbedded(){
-          const el=document.getElementById('csv-embed');
-          if(!el) return false; const text=el.textContent||''; if(!text.trim()) return false; allRows=parseCSV(text).filter(r=>r&&r.id); dataSource='内嵌'; lastLoaded=new Date().toLocaleString(); applyFilters(); return true;
-        }
         if (location.protocol === 'file:') {
           if(!tryEmbedded()) { errorEl.classList.remove('hidden'); showPicker(); }
         } else {
           loadCSV(false, false);
         }
->>>>>>> 3338a79 (2025/12/04 10:44:33: Data update)
->>>>>>> 456700a (2025/12/04 10:58:53: Data update)
       })();
     </script>
   </body>
