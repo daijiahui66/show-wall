@@ -257,7 +257,7 @@
           for(let i=1;i<count;i++) paths.push(`images/${id}(${i}).png`);
           return paths;
         }
-        function onImgError(e){ const el=e.currentTarget; if(el.dataset.fallbackTried==='1') return; el.dataset.fallbackTried='1'; el.src=el.src.replace(/\.png($|\?)/,'.jpg$1'); }
+        function onImgError(e){ const el=e.currentTarget; const exts=['webp','jpg','png']; let idx=Number(el.dataset.formatIndex||'0')+1; const base=el.src.replace(/\.(png|jpg|jpeg|webp)($|\?)/i,''); if(idx<exts.length){ el.dataset.formatIndex=String(idx); el.src=`${base}.${exts[idx]}`; }
         function clearWall(){ wallEl.innerHTML=''; }
         const overlay=document.getElementById('overlay');
         const modalGallery=document.getElementById('modal-gallery');
@@ -287,7 +287,7 @@
           imagesEl.innerHTML=''; dotsEl.innerHTML='';
           if(paths.length>0){
             modalGallery.hidden=false;
-            paths.forEach((src,i)=>{ const wrap=document.createElement('div'); wrap.className='image-wrap'+(i===0?' active':''); wrap.dataset.idx=String(i); const img=document.createElement('img'); img.src=src; img.alt=`图片 ${row.id}`; img.addEventListener('error',onImgError); img.addEventListener('click', (ev)=>{ ev.stopPropagation(); const start=Number(wrap.dataset.idx|| i); openImgbox(paths, start); }); wrap.appendChild(img); imagesEl.appendChild(wrap); const dot=document.createElement('div'); dot.className='dot'+(i===0?' active':''); dot.dataset.idx=String(i); dotsEl.appendChild(dot); });
+            paths.forEach((src,i)=>{ const wrap=document.createElement('div'); wrap.className='image-wrap'+(i===0?' active':''); wrap.dataset.idx=String(i); const img=document.createElement('img'); img.loading='lazy'; img.decoding='async'; img.fetchPriority = i===0 ? 'high' : 'low'; const base=src.replace(/\.(png|jpg|jpeg|webp)($|\?)/i,''); img.dataset.formatIndex='0'; img.src=`${base}.webp`; img.alt=`图片 ${row.id}`; img.addEventListener('error',onImgError); img.addEventListener('click', (ev)=>{ ev.stopPropagation(); const start=Number(wrap.dataset.idx|| i); openImgbox(paths, start); }); wrap.appendChild(img); imagesEl.appendChild(wrap); const dot=document.createElement('div'); dot.className='dot'+(i===0?' active':''); dot.dataset.idx=String(i); dotsEl.appendChild(dot); });
             initViewer(modalGallery);
           } else { modalGallery.hidden=true; }
           overlay.classList.add('show');
@@ -324,7 +324,7 @@
           const dotsEl=gallery.querySelector('.dots');
           if(paths.length>0){
             gallery.hidden=false;
-            paths.forEach((src,i)=>{ const wrap=document.createElement('div'); wrap.className='image-wrap'+(i===0?' active':''); wrap.dataset.idx=String(i); const img=document.createElement('img'); img.src=src; img.alt=`图片 ${id}`; img.addEventListener('error',onImgError); img.addEventListener('click', (ev)=>{ ev.stopPropagation(); const start=Number(wrap.dataset.idx|| i); openImgbox(paths, start); }); wrap.appendChild(img); imagesEl.appendChild(wrap); const dot=document.createElement('div'); dot.className='dot'+(i===0?' active':''); dot.dataset.idx=String(i); dotsEl.appendChild(dot); });
+            paths.forEach((src,i)=>{ const wrap=document.createElement('div'); wrap.className='image-wrap'+(i===0?' active':''); wrap.dataset.idx=String(i); const img=document.createElement('img'); img.loading='lazy'; img.decoding='async'; img.fetchPriority = i===0 ? 'high' : 'low'; const base=src.replace(/\.(png|jpg|jpeg|webp)($|\?)/i,''); img.dataset.formatIndex='0'; img.src=`${base}.webp`; img.alt=`图片 ${id}`; img.addEventListener('error',onImgError); img.addEventListener('click', (ev)=>{ ev.stopPropagation(); const start=Number(wrap.dataset.idx|| i); openImgbox(paths, start); }); wrap.appendChild(img); imagesEl.appendChild(wrap); const dot=document.createElement('div'); dot.className='dot'+(i===0?' active':''); dot.dataset.idx=String(i); dotsEl.appendChild(dot); });
             initViewer(gallery);
           }
           root.addEventListener('click', (e)=>{ if(e.target.closest('.btn') || e.target.closest('.dot')) return; showModal(row); });
