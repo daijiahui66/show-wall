@@ -11,14 +11,14 @@
         --text:#2b2b2b;--muted:#727272;--card:#ffffff;--border:#ffd1df;
       }
       *{box-sizing:border-box}
-      html,body{height:100%;}
+      html,body{height:100%; overflow-x:hidden;}
       body{margin:0;font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--text)}
       .bg-candy{background:radial-gradient(1200px 400px at 10% -10%, var(--candy-100) 0%, transparent 40%),radial-gradient(800px 300px at 90% 0%, var(--sky-100) 0%, transparent 40%),linear-gradient(180deg,#fff 0%, var(--candy-50) 100%)}
       .bubble{position:absolute;border-radius:50%;filter:blur(1px);opacity:.65}
       .bubble.b1{width:200px;height:200px;background:var(--candy-300);top:8%;left:-60px}
       .bubble.b2{width:160px;height:160px;background:var(--sky-300);bottom:10%;right:-50px}
       .bubble.b3{width:120px;height:120px;background:var(--candy-100);bottom:35%;left:-40px}
-      .container{max-width:1100px;margin:0 auto;padding:0 20px}
+      .container{max-width:1100px;width:100%;margin:0 auto;padding:0 20px}
       .header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border-bottom:1px solid var(--candy-100)}
       .header-bar{display:flex;align-items:center;gap:12px;padding:14px 20px}
       .logo{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,var(--candy-300),var(--sky-300));box-shadow:0 6px 16px rgba(255,92,135,.2)}
@@ -27,7 +27,7 @@
       .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:18px 0}
       .input{width:280px;max-width:100%;padding:10px 14px;border-radius:16px;border:1px solid var(--border);background:#fff}
       .checkbox{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#494949}
-      .masonry{column-count:1;column-gap:18px}
+      .masonry{column-count:1;column-gap:18px;width:100%}
       @media(min-width:760px){.masonry{column-count:2}}
       @media(min-width:1160px){.masonry{column-count:3}}
       .card{position:relative;background:var(--card);border-radius:24px;box-shadow:0 10px 30px rgba(255,92,135,.18);overflow:hidden;animation:fadeIn .35s ease;display:inline-block;width:100%;break-inside:avoid;margin:0 0 18px}
@@ -55,7 +55,7 @@
       .hint{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:#fff0f5;border:1px solid var(--border);color:#a51743;font-size:13px}
       .hidden{display:none}
       .action{display:inline-block;padding:8px 12px;border-radius:14px;background:#fff;border:1px solid var(--border);color:#8c0f37}
-      .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:40}
+      .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:1001}
       .overlay.show{display:grid;place-items:center}
       .modal{width:min(860px,94vw);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.18)}
       .modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #f3d9e3}
@@ -65,17 +65,17 @@
       .modal-msg{white-space:pre-wrap;line-height:1.8;margin-top:10px}
       .modal-close{background:#fff;border:1px solid #f3d9e3;color:#8c0f37;width:34px;height:34px;border-radius:10px}
       @media(max-width:768px){
-        .container{padding:0 14px}
+        .container{padding:0 12px}
         .header-bar{padding:12px 14px}
         .logo{width:42px;height:42px}
         .title{font-size:clamp(18px,5.2vw,22px)}
         .subtitle{font-size:12px}
         .filters{margin:12px 0}
         .input{width:100%}
-        .masonry{column-gap:14px}
+        .masonry{column-gap:12px}
         .card{margin:0 0 14px}
         .card-body{padding:14px}
-        .frame{height:auto;aspect-ratio:16/9;width:94%;margin:8px auto 10px}
+        .frame{height:auto;aspect-ratio:16/9;width:100%;margin:8px auto 10px}
         .btn{width:32px;height:32px}
         .dots{bottom:6px}
       }
@@ -270,7 +270,7 @@
         const imgboxClose=imgbox.querySelector('.imgbox-close');
         let imgboxPaths=[]; let imgboxIdx=0;
         function showImgbox(){ if(!imgboxPaths.length) return; imgboxImg.src=imgboxPaths[imgboxIdx]; }
-        function openImgbox(paths,start){ imgboxPaths=paths.slice(); imgboxIdx=Math.max(0, Math.min(paths.length-1, start||0)); showImgbox(); imgbox.classList.add('show'); }
+        function openImgbox(paths,start){ imgboxPaths=paths.slice(); imgboxIdx=Math.max(0, Math.min(paths.length-1, start||0)); imgboxImg.dataset.fallback=''; imgboxImg.onerror=()=>{ if(imgboxImg.dataset.fallback==='') { imgboxImg.dataset.fallback='1'; imgboxImg.src=imgboxImg.src.replace(/\.png($|\?)/,'.jpg$1'); } }; showImgbox(); imgbox.classList.add('show'); }
         function closeImgbox(){ imgbox.classList.remove('show'); }
         imgboxClose.addEventListener('click', closeImgbox);
         imgbox.addEventListener('click', e=>{ if(e.target===imgbox) closeImgbox(); });
@@ -299,11 +299,13 @@
           const wraps=[...gallery.querySelectorAll('.image-wrap')];
           const dots=[...gallery.querySelectorAll('.dot')];
           let idx=0;
-          function show(i){ idx=(i+wraps.length)%wraps.length; wraps.forEach((w,j)=>w.classList.toggle('active', j===idx)); dots.forEach((d,j)=>d.classList.toggle('active', j===idx)); }
+          function show(i){ idx=(i+wraps.length)%wraps.length; wraps.forEach((w,j)=>w.classList.toggle('active', j===idx)); dots.forEach((d,j)=>d.classList.toggle('active', j===idx)); gallery.dataset.currentIndex=String(idx); }
           gallery.querySelector('.prev').addEventListener('click',()=>show(idx-1));
           gallery.querySelector('.next').addEventListener('click',()=>show(idx+1));
           dots.forEach(d=>d.addEventListener('click',()=>show(Number(d.dataset.idx||'0'))));
           show(0);
+          const frame=gallery.querySelector('.frame');
+          if(frame){ frame.addEventListener('click',(ev)=>{ ev.stopPropagation(); const imgs=[...gallery.querySelectorAll('.image-wrap img')].map(i=>i.src); const start=Number(gallery.dataset.currentIndex||'0'); openImgbox(imgs,start); }); }
         }
         function applyFilters(){ const q=searchEl.value.trim().toLowerCase(); const onlyImg=withImagesEl.checked; filteredRows=allRows.filter(r=>String(r.状态).trim()==='可展示').filter(r=>{ if(!q) return true; const text=`${r.标题||''} ${r.留言||''}`.toLowerCase(); return text.includes(q); }).filter(r=>{ if(!onlyImg) return true; return String(r.是否有图||'').trim()==='1'; }); shuffledRows=shuffle(filteredRows.slice()); visibleCount=50; renderInit(); }
         function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=arr[i]; arr[i]=arr[j]; arr[j]=t; } return arr; }
