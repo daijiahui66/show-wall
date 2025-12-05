@@ -53,6 +53,7 @@
       break-inside: avoid;
     }
 
+    /* 布局网格 */
     .img-grid-1 {
       grid-template-columns: 1fr;
     }
@@ -73,6 +74,7 @@
       grid-template-columns: 1fr 1fr;
     }
 
+    /* 动画 */
     .fade-enter-active,
     .fade-leave-active {
       transition: opacity 0.3s ease;
@@ -110,7 +112,7 @@
       position: absolute;
     }
 
-    /* 进度条动画 Keyframes - 解决进度条不动的问题 */
+    /* 进度条动画 */
     @keyframes progress-grow {
       from {
         width: 0%;
@@ -122,6 +124,7 @@
     }
 
     .animate-progress-bar {
+      /* 60秒线性动画 */
       animation: progress-grow 60s linear forwards;
     }
   </style>
@@ -189,21 +192,18 @@
         </div>
 
         <div class="hidden md:flex items-center justify-end gap-4 z-10 flex-1">
-          <div
-            class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200/50 hover:bg-white transition-colors">
-            <label class="flex items-center gap-2 cursor-pointer select-none">
-              <span class="text-xs font-medium" :class="isAutoRefresh ? 'text-indigo-600' : 'text-gray-400'">
-                <i class="fa-solid fa-infinity mr-1"></i>自动轮播
-              </span>
-              <div class="relative">
-                <input type="checkbox" v-model="isAutoRefresh" @change="toggleAutoRefresh" class="sr-only">
-                <div class="w-9 h-5 bg-gray-200 rounded-full shadow-inner transition-colors duration-300"
-                  :class="{ '!bg-green-500': isAutoRefresh }"></div>
-                <div
-                  class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full shadow transition-transform duration-300"
-                  :class="{ 'translate-x-4': isAutoRefresh }"></div>
-              </div>
-            </label>
+
+          <div @click="toggleAutoRefresh"
+            class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200/50 hover:bg-white transition-colors cursor-pointer select-none group">
+            <span class="text-xs font-medium transition-colors"
+              :class="isAutoRefresh ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'">
+              <i class="fa-solid fa-infinity mr-1"></i>自动轮播
+            </span>
+            <div class="relative w-9 h-5 rounded-full shadow-inner transition-colors duration-300"
+              :class="isAutoRefresh ? 'bg-green-500' : 'bg-gray-200'">
+              <div class="absolute top-1 left-1 bg-white w-3 h-3 rounded-full shadow transition-transform duration-300"
+                :class="{ 'translate-x-4': isAutoRefresh }"></div>
+            </div>
           </div>
 
           <button @click="manualRefresh"
@@ -220,8 +220,8 @@
         </div>
       </div>
 
-      <div class="absolute bottom-0 left-0 h-[2px] bg-green-500 w-full" v-if="isAutoRefresh && showProgressBar">
-        <div class="h-full bg-green-500 animate-progress-bar"></div>
+      <div class="absolute bottom-0 left-0 h-[3px] bg-green-500 w-full z-50" v-if="isAutoRefresh && showProgressBar">
+        <div class="h-full bg-green-400 animate-progress-bar shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
       </div>
     </header>
 
@@ -279,8 +279,8 @@
 
       <div ref="loadSentinel"
         class="w-full py-8 text-center text-gray-400 text-sm flex items-center justify-center gap-2">
-        <span v-if="isAutoRefresh" class="text-green-600"><i class="fa-solid fa-circle-play mr-1"></i>自动轮播中
-          (每60秒更新)</span>
+        <span v-if="isAutoRefresh" class="text-green-600 animate-pulse"><i
+            class="fa-solid fa-circle-play mr-1"></i>自动轮播中 (每60秒更新)</span>
         <span v-else-if="hasMore"><i class="fa-solid fa-circle-notch fa-spin"></i> 正在加载更多回忆...</span>
         <span v-else>—— 共 {{ totalFilteredCount }} 条回忆 ——</span>
       </div>
@@ -353,7 +353,7 @@
     </script>
 
   <script>
-    const { createApp, ref, computed, onMounted, onUnmounted, nextTick } = Vue;
+    const { createApp, ref, computed, onMounted, onUnmounted, nextTick, watch } = Vue;
 
     createApp({
       setup() {
@@ -368,7 +368,8 @@
         // 轮播控制
         const isAutoRefresh = ref(false);
         let autoRefreshTimer = null;
-        const showProgressBar = ref(false); // 用于强制刷新DOM来实现进度条重置
+        const showProgressBar = ref(false);
+        const REFRESH_INTERVAL = 60000; // 60秒
 
         const PAGE_SIZE_INIT = 30;
         const PAGE_SIZE_MORE = 10;
@@ -491,13 +492,12 @@
           displayedList.value = filteredAllMessages.value.slice(0, currentLimit.value);
           window.scrollTo({ top: 0, behavior: 'smooth' });
 
-          // 修复进度条逻辑：强制移除再添加，触发 keyframes 重新播放
+          // 重置进度条：通过 setTimeout 强制浏览器重新渲染
           if (isAutoRefresh.value) {
             showProgressBar.value = false;
-            nextTick(() => {
-              // 强制重绘
-              showProgressBar.value = true;
-            });
+            setTimeout(() => {
+              if (isAutoRefresh.value) showProgressBar.value = true;
+            }, 100);
           }
         };
 
@@ -507,18 +507,20 @@
 
         const toggleAutoRefresh = () => {
           isAutoRefresh.value = !isAutoRefresh.value;
-          if (isAutoRefresh.value) {
+        };
+
+        // 使用 Watch 监听开关，解决事件冲突，保证逻辑清晰
+        watch(isAutoRefresh, (newVal) => {
+          if (newVal) {
             // 开启
             showProgressBar.value = true;
-            autoRefreshTimer = setInterval(() => {
-              reShuffleDisplay();
-            }, 60000); // 60秒
+            autoRefreshTimer = setInterval(reShuffleDisplay, REFRESH_INTERVAL);
           } else {
             // 关闭
             if (autoRefreshTimer) clearInterval(autoRefreshTimer);
             showProgressBar.value = false;
           }
-        };
+        });
 
         onMounted(() => {
           const observer = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMore(); }, { rootMargin: '100px' });
@@ -579,7 +581,6 @@
           resetPagination, loadCSV, handleFileUpload, handleImgError, toggleImageOnly,
           currentMsg, openDetail, closeDetail,
           lightboxImages, currentLightboxIndex, openLightbox, closeLightbox, nextImage, prevImage,
-          // 新增控制
           isAutoRefresh, toggleAutoRefresh, manualRefresh, showProgressBar
         };
       }
